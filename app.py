@@ -36,6 +36,7 @@ def index():
             sudo_logs.append(log)
 
     # Check for keyboard
+    kaybord-names = ["Keyboard","keyboard","KB"]
     keyboard_logs = []
     for log in logs:
         if re.match("KB","keyboard","Keyboard", log):
