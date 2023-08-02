@@ -9,7 +9,7 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     # Get the logs from the file
-    logs = open("/var/log/*.log", "r").readlines()[-20:]
+    logs = open("/var/log/auth.log", "r").readlines()[-20:]
 
     # Check for brute force attack
     brute_force_logs = []
