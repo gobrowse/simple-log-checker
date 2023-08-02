@@ -19,7 +19,7 @@ def index():
     # Search for "rivel 360 mouse"
     mouse_logs = []
     for log in logs:
-        if re.match("rivel 360 mouse", log):
+        if re.match("Mouse", log):
             mouse_logs.append(log)
 
     # Check for brute force attack
@@ -45,7 +45,7 @@ def index():
         </head>
         <body>
             <h1>A Revel 360 mouse is connected</h1>
-            <p>The text "rivel 360 mouse" has been found in the logs. This is often used by attackers to identify the type of mouse that is connected to a system.</p>
+            <p>The text "mouse" has been found in the logs. A Mouse is probably connected to your computer.</p>
         </body>
         </html>
         """
