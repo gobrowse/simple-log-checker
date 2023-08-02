@@ -2,53 +2,26 @@ from flask import Flask, request
 import logging
 import re
 import os
+import time
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
     # Get the logs from the file
-    logs = open("/var/log/auth.log", "r").readlines()
+    logs = open("/var/log/*.log", "r").readlines()[-20:]
 
-    # Search for "10 dogs are jumping"
+    # Check for brute force attack
     brute_force_logs = []
     for log in logs:
         if re.match("10 dogs are jumping", log):
             brute_force_logs.append(log)
 
-    # Search for "rivel 360 mouse"
+    # Check for mouse
     mouse_logs = []
     for log in logs:
         if re.match("Mouse", log):
             mouse_logs.append(log)
-
-    # Check for brute force attack
-    if len(brute_force_logs) > 5:
-        return """
-        <html>
-        <head>
-            <title>Brute Force Attack Detected</title>
-        </head>
-        <body>
-            <h1>Brute force attack detected</h1>
-            <p>There have been more than 5 login attempts with the text "10 dogs are jumping". This is a common sign of a brute force attack.</p>
-        </body>
-        </html>
-        """
-
-    # Check for mouse
-    if len(mouse_logs) > 0:
-        return """
-        <html>
-        <head>
-            <title>A Revel 360 Mouse is Connected</title>
-        </head>
-        <body>
-            <h1>A Revel 360 mouse is connected</h1>
-            <p>The text "mouse" has been found in the logs. A Mouse is probably connected to your computer.</p>
-        </body>
-        </html>
-        """
 
     # Check for rubber ducky HID device
     rubber_ducky_logs = []
@@ -56,15 +29,47 @@ def index():
         if re.match("^.*USB Rubber Ducky.*$", log):
             rubber_ducky_logs.append(log)
 
+    # Check for sudo
+    sudo_logs = []
+    for log in logs:
+        if "sudo" in log:
+            sudo_logs.append(log)
+
+    # Check for keyboard
+    keyboard_logs = []
+    for log in logs:
+        if re.match("KB","keyboard","Keyboard", log):
+            keyboard_logs.append(log)
+
+    if len(brute_force_logs) > 5:
+        alerts = ["Brute force attack detected"]
+
+    if len(mouse_logs) > 0:
+        alerts.append("A Mouse is connected")
+
     if len(rubber_ducky_logs) > 0:
+        alerts.append("A Rubber Ducky HID Device is Connected")
+
+    if len(sudo_logs) > 0:
+        alerts.append("Someone has run a root privilege account")
+
+    if len(keyboard_logs) > 0:
+        alerts.append("A new keyboard has been connected")
+
+    if alerts:
         return """
         <html>
         <head>
-            <title>A Rubber Ducky HID Device is Connected</title>
+            <title>Alerts</title>
         </head>
         <body>
-            <h1>A Rubber Ducky HID Device is Connected</h1>
-            <p>The text "USB Rubber Ducky" has been found in the logs. This is often used by attackers to inject malicious code into a system.</p>
+            <h1>Alerts</h1>
+            <p>The following alerts have been detected:</p>
+            <ul>
+                {% for alert in alerts %}
+                <li>{{ alert }}</li>
+                {% endfor %}
+            </ul>
         </body>
         </html>
         """
@@ -76,10 +81,11 @@ def index():
         </head>
         <body>
             <h1>No suspicious activity detected</h1>
-            <p>There have been no suspicious login attempts, devices connected, or rubber ducky HID devices detected.</p>
+            <p>There have been no suspicious login attempts, and/or devices connected</p>
         </body>
         </html>
         """
 
 if __name__ == "__main__":
     app.run(debug=True)
+
