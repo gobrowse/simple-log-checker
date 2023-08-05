@@ -10,6 +10,8 @@ app = Flask(__name__)
 def index():
     # Get the logs from the file
     logs = open("/var/log/auth.log", "r").readlines()[-20:]
+     # Get the logs from the file
+    logs-faillog = open("/var/log/faillog", "r").readlines()[-20:]
 
     # Check for brute force attack
     brute_force_logs = []
@@ -23,12 +25,6 @@ def index():
         if re.match("Mouse", log):
             mouse_logs.append(log)
 
-    # Check for rubber ducky HID device
-    rubber_ducky_logs = []
-    for log in logs:
-        if re.match("^.*USB Rubber Ducky.*$", log):
-            rubber_ducky_logs.append(log)
-
     # Check for sudo
     sudo_logs = []
     for log in logs:
@@ -36,10 +32,10 @@ def index():
             sudo_logs.append(log)
 
     # Check for keyboard
-    kaybord-names = ["Keyboard","keyboard","KB"]
+    keyboard-names = ["Keyboard","keyboard","KB"]
     keyboard_logs = []
     for log in logs:
-        if re.match("KB","keyboard","Keyboard", log):
+        if re.match(keyboard-names, log):
             keyboard_logs.append(log)
 
     if len(brute_force_logs) > 5:
@@ -47,9 +43,6 @@ def index():
 
     if len(mouse_logs) > 0:
         alerts.append("A Mouse is connected")
-
-    if len(rubber_ducky_logs) > 0:
-        alerts.append("A Rubber Ducky HID Device is Connected")
 
     if len(sudo_logs) > 0:
         alerts.append("Someone has run a root privilege account")
