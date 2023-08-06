@@ -37,8 +37,9 @@ def index():
             if re.match(kb_name, log):
                 keyboard_logs.append(log)
 
+    alerts = []
     if len(brute_force_logs) > 5:
-        alerts = ["Brute force attack detected"]
+        alerts.append("Brute force attack detected")
 
     if len(mouse_logs) > 0:
         alerts.append("A Mouse is connected")
@@ -49,7 +50,7 @@ def index():
     if len(keyboard_logs) > 0:
         alerts.append("A new keyboard has been connected")
 
-    if alerts:
+    if len(alerts) > 0:
         return """
         <html>
         <head>
