@@ -33,8 +33,9 @@ def index():
     keyboard_names = ["Keyboard","keyboard","KB"]
     keyboard_logs = []
     for log in logs:
-        if re.match(keyboard_names, log):
-            keyboard_logs.append(log)
+        for kb_name in keyboard_names:
+            if re.match(kb_name, log):
+                keyboard_logs.append(log)
 
     if len(brute_force_logs) > 5:
         alerts = ["Brute force attack detected"]
