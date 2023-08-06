@@ -33,7 +33,7 @@ def index():
     keyboard_names = ["Keyboard","keyboard","KB"]
     keyboard_logs = []
     for log in logs:
-        if re.match(keyboard-names, log):
+        if re.match(keyboard_names, log):
             keyboard_logs.append(log)
 
     if len(brute_force_logs) > 5:
