@@ -10,13 +10,11 @@ app = Flask(__name__)
 def index():
     # Get the logs from the file
     logs = open("/var/log/auth.log", "r").readlines()[-20:]
-     # Get the logs from the file
-    logs-faillog = open("/var/log/faillog", "r").readlines()[-20:]
 
     # Check for brute force attack
     brute_force_logs = []
     for log in logs:
-        if re.match("10 dogs are jumping", log):
+        if re.match("Failed password", log):
             brute_force_logs.append(log)
 
     # Check for mouse
