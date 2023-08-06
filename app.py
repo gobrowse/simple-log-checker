@@ -30,7 +30,7 @@ def index():
             sudo_logs.append(log)
 
     # Check for keyboard
-    keyboard-names = ["Keyboard","keyboard","KB"]
+    keyboard_names = ["Keyboard","keyboard","KB"]
     keyboard_logs = []
     for log in logs:
         if re.match(keyboard-names, log):
