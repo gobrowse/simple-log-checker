@@ -1,54 +1,48 @@
-import re
-from flask import Flask, render_template
-
-app = Flask(__name__)
-
-@app.route("/")
-def index():
-    with open("/var/log/auth.log", "r") as f:
-        logs = f.readlines()[-20:]
-    
-    alerts = check_logs(logs)
-
-    if alerts:
-        return render_template("index.html", alerts=alerts, logs=logs)
-    else:
-        return "<h1>No Alerts</h1>"
-
-
-def check_logs(logs):
     alerts = []
+    if len(brute_force_logs) > 5:
+        alerts.append("Brute force attack detected")
 
-    brute_force = detect_brute_force(logs)
-    if brute_force:
-        alerts.append(brute_force)
+    if len(mouse_logs) > 0:
+        alerts.append("A Mouse is connected")
 
-    mouse = detect_mouse(logs)
-    if mouse:
-        alerts.append(mouse)
+    if len(sudo_logs) > 0:
+        alerts.append("Someone has run a root privilege account")
 
-    sudo = detect_sudo(logs)
-    if sudo:
-        alerts.append(sudo)
+    if len(keyboard_logs) > 0:
+        alerts.append("A new keyboard has been connected")
 
-    keyboard = detect_keyboard(logs)
-    if keyboard:
-        alerts.append(keyboard)
+    if len(alerts) > 0:
+        return """
+        <html>
+        <head>
+            <title>Alerts</title>
+        </head>
+        <body>
+            <h1>Alerts</h1>
+            <p>The following alerts have been detected:</p>
+            <ul>
+                {% for alert in alerts %}
+                <li>{{ alert }}</li>
+                {% endfor %}
+            </ul>
+        </body>
+        </html>
+        """
 
-    return alerts
+    return """
+        <html>
+        <head>
+            <title>No Suspicious Activity Detected</title>
+        </head>
+        <body>
+            <h1>No suspicious activity detected</h1>
+            <p>There have been no suspicious login attempts, and/or devices connected</p>
+        </body>
+        </html>
+        """
 
-
-def detect_brute_force(logs):
-    brute_logs = [log for log in logs if re.search("Failed password", log)]
-    if len(brute_logs) > 5:
-        return "Brute force attack detected"
-
-
-def detect_mouse(logs):
-    mouse_logs = [log for log in logs if re.search("Mouse", log)]
-    if mouse_logs:
-        return "Mouse detected"
-
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", debug=True)
 
 # Other detection functions    
 
