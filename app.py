@@ -4,6 +4,38 @@ import re
 import os
 import time
 
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    # Get the logs from the file
+    logs = open("/var/log/auth.log", "r").readlines()[-20:]
+
+    # Check for brute force attack
+    brute_force_logs = []
+    for log in logs:
+        if re.match("Failed password", log):
+            brute_force_logs.append(log)
+
+    # Check for mouse
+    mouse_logs = []
+    for log in logs:
+        if re.match("Mouse", log):
+            mouse_logs.append(log)
+
+    # Check for sudo
+    sudo_logs = []
+    for log in logs:
+        if "sudo" in log:
+            sudo_logs.append(log)
+
+    # Check for keyboard
+    keyboard_names = ["Keyboard","keyboard","KB"]
+    keyboard_logs = []
+    for log in logs:
+        for kb_name in keyboard_names:
+            if re.match(kb_name, log):
+                keyboard_logs.append(log)
 
     alerts = []
     if len(brute_force_logs) > 5:
