@@ -1,85 +1,56 @@
-from flask import Flask, request
-import logging
 import re
-import os
-import time
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    # Get the logs from the file
-    logs = open("/var/log/auth.log", "r").readlines()[-20:]
+    with open("/var/log/auth.log", "r") as f:
+        logs = f.readlines()[-20:]
+    
+    alerts = check_logs(logs)
 
-    # Check for brute force attack
-    brute_force_logs = []
-    for log in logs:
-        if re.match("Failed password", log):
-            brute_force_logs.append(log)
+    if alerts:
+        return render_template("index.html", alerts=alerts, logs=logs)
+    else:
+        return "<h1>No Alerts</h1>"
 
-    # Check for mouse
-    mouse_logs = []
-    for log in logs:
-        if re.match("Mouse", log):
-            mouse_logs.append(log)
 
-    # Check for sudo
-    sudo_logs = []
-    for log in logs:
-        if "sudo" in log:
-            sudo_logs.append(log)
-
-    # Check for keyboard
-    keyboard_names = ["Keyboard","keyboard","KB"]
-    keyboard_logs = []
-    for log in logs:
-        for kb_name in keyboard_names:
-            if re.match(kb_name, log):
-                keyboard_logs.append(log)
-
+def check_logs(logs):
     alerts = []
-    if len(brute_force_logs) > 5:
-        alerts.append("Brute force attack detected")
 
-    if len(mouse_logs) > 0:
-        alerts.append("A Mouse is connected")
+    brute_force = detect_brute_force(logs)
+    if brute_force:
+        alerts.append(brute_force)
 
-    if len(sudo_logs) > 0:
-        alerts.append("Someone has run a root privilege account")
+    mouse = detect_mouse(logs)
+    if mouse:
+        alerts.append(mouse)
 
-    if len(keyboard_logs) > 0:
-        alerts.append("A new keyboard has been connected")
+    sudo = detect_sudo(logs)
+    if sudo:
+        alerts.append(sudo)
 
-    if len(alerts) > 0:
-        return """
-        <html>
-        <head>
-            <title>Alerts</title>
-        </head>
-        <body>
-            <h1>Alerts</h1>
-            <p>The following alerts have been detected:</p>
-            <ul>
-                {% for alert in alerts %}
-                <li>{{ alert }}</li>
-                {% endfor %}
-            </ul>
-        </body>
-        </html>
-        """
+    keyboard = detect_keyboard(logs)
+    if keyboard:
+        alerts.append(keyboard)
 
-    return """
-        <html>
-        <head>
-            <title>No Suspicious Activity Detected</title>
-        </head>
-        <body>
-            <h1>No suspicious activity detected</h1>
-            <p>There have been no suspicious login attempts, and/or devices connected</p>
-        </body>
-        </html>
-        """
+    return alerts
+
+
+def detect_brute_force(logs):
+    brute_logs = [log for log in logs if re.search("Failed password", log)]
+    if len(brute_logs) > 5:
+        return "Brute force attack detected"
+
+
+def detect_mouse(logs):
+    mouse_logs = [log for log in logs if re.search("Mouse", log)]
+    if mouse_logs:
+        return "Mouse detected"
+
+
+# Other detection functions    
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
-
+    app.run(debug=True)
